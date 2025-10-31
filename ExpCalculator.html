@@ -1,0 +1,691 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EXP 收益計算器</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', 'Microsoft JhengHei', sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        
+        .container {
+            background-color: rgba(255, 255, 255, 0.9);
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            width: 100%;
+            max-width: 500px;
+            padding: 30px;
+            position: relative;
+        }
+        
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 25px;
+            font-weight: 600;
+        }
+        
+        .input-group {
+            margin-bottom: 20px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: #444;
+        }
+        
+        input {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+        
+        input:focus {
+            border-color: #4a7dff;
+            outline: none;
+        }
+        
+        .button-group {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 25px;
+        }
+        
+        button {
+            flex: 1;
+            padding: 12px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        #startBtn {
+            background-color: #4a7dff;
+            color: white;
+        }
+        
+        #startBtn:hover {
+            background-color: #3a6de0;
+        }
+        
+        #updateBtn {
+            background-color: #2ecc71;
+            color: white;
+        }
+        
+        #updateBtn:hover {
+            background-color: #27ae60;
+        }
+        
+        #resetBtn {
+            background-color: #e74c3c;
+            color: white;
+        }
+        
+        #resetBtn:hover {
+            background-color: #c0392b;
+        }
+        
+        #saveBtn {
+            background-color: #9b59b6;
+            color: white;
+        }
+        
+        #saveBtn:hover {
+            background-color: #8e44ad;
+        }
+        
+        #viewBtn {
+            background-color: #f39c12;
+            color: white;
+        }
+        
+        #viewBtn:hover {
+            background-color: #e67e22;
+        }
+        
+        .timer {
+            text-align: center;
+            font-size: 36px;
+            font-weight: 700;
+            color: #333;
+            margin: 20px 0;
+            padding: 15px;
+            background-color: #f8f9fa;
+            border-radius: 10px;
+            box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+        
+        .results {
+            background-color: #f8f9fa;
+            border-radius: 10px;
+            padding: 20px;
+            margin-top: 20px;
+        }
+        
+        .result-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .result-item:last-child {
+            margin-bottom: 0;
+            padding-bottom: 0;
+            border-bottom: none;
+        }
+        
+        .result-label {
+            color: #666;
+        }
+        
+        .result-value {
+            font-weight: 600;
+            color: #333;
+        }
+        
+        .highlight {
+            color: #e74c3c;
+            font-weight: 700;
+        }
+        
+        .instructions {
+            margin-top: 25px;
+            padding: 15px;
+            background-color: #e8f4fd;
+            border-radius: 8px;
+            font-size: 14px;
+            color: #2c3e50;
+        }
+        
+        .instructions h3 {
+            margin-bottom: 10px;
+            color: #2980b9;
+        }
+        
+        .instructions ol {
+            padding-left: 20px;
+        }
+        
+        .instructions li {
+            margin-bottom: 8px;
+        }
+        
+        /* 模态窗口样式 */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .modal-content {
+            background-color: white;
+            border-radius: 15px;
+            width: 90%;
+            max-width: 500px;
+            padding: 25px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        }
+        
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        
+        .modal-title {
+            font-size: 20px;
+            font-weight: 600;
+            color: #333;
+        }
+        
+        .close-btn {
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            color: #777;
+        }
+        
+        .close-btn:hover {
+            color: #333;
+        }
+        
+        .save-form {
+            margin-bottom: 20px;
+        }
+        
+        .save-form input {
+            margin-bottom: 15px;
+        }
+        
+        .records-list {
+            max-height: 300px;
+            overflow-y: auto;
+            border: 1px solid #eee;
+            border-radius: 8px;
+            padding: 10px;
+        }
+        
+        .record-item {
+            padding: 12px;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .record-item:last-child {
+            border-bottom: none;
+        }
+        
+        .record-info {
+            flex: 1;
+        }
+        
+        .record-name {
+            font-weight: 600;
+            color: #333;
+        }
+        
+        .record-details {
+            font-size: 14px;
+            color: #666;
+            margin-top: 5px;
+        }
+        
+        .record-actions {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .delete-btn {
+            background-color: #e74c3c;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            padding: 5px 10px;
+            cursor: pointer;
+            font-size: 12px;
+        }
+        
+        .delete-btn:hover {
+            background-color: #c0392b;
+        }
+        
+        .load-btn {
+            background-color: #3498db;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            padding: 5px 10px;
+            cursor: pointer;
+            font-size: 12px;
+        }
+        
+        .load-btn:hover {
+            background-color: #2980b9;
+        }
+        
+        .no-records {
+            text-align: center;
+            color: #777;
+            padding: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>EXP 收益計算器</h1>
+        
+        <div class="input-group">
+            <label for="startExp">起始經驗值</label>
+            <input type="number" id="startExp" placeholder="輸入起始經驗值">
+        </div>
+        
+        <div class="input-group">
+            <label for="currentExp">目前經驗值 (更新用)</label>
+            <input type="number" id="currentExp" placeholder="輸入目前經驗值">
+        </div>
+        
+        <div class="button-group">
+            <button id="startBtn">開始計時</button>
+            <button id="updateBtn">更新經驗</button>
+            <button id="resetBtn">重置</button>
+        </div>
+        
+        <div class="button-group">
+            <button id="saveBtn">保存當前收益</button>
+            <button id="viewBtn">查看記錄</button>
+        </div>
+        
+        <div class="timer" id="timer">00:00:00</div>
+        
+        <div class="results">
+            <div class="result-item">
+                <span class="result-label">總獲得經驗:</span>
+                <span class="result-value" id="totalExp">0</span>
+            </div>
+            <div class="result-item">
+                <span class="result-label">經過時間:</span>
+                <span class="result-value" id="elapsedTime">0 分鐘</span>
+            </div>
+            <div class="result-item">
+                <span class="result-label">每分鐘收益:</span>
+                <span class="result-value highlight" id="expPerMin">0</span>
+            </div>
+            <div class="result-item">
+                <span class="result-label">每小時收益:</span>
+                <span class="result-value" id="expPerHour">0</span>
+            </div>
+        </div>
+        
+        <div class="instructions">
+            <h3>使用說明</h3>
+            <ol>
+                <li>輸入起始經驗值</li>
+                <li>點擊「開始計時」按鈕開始計時</li>
+                <li>經過一段時間後，輸入目前經驗值並點擊「更新經驗」</li>
+                <li>系統會自動計算每分鐘的經驗收益</li>
+                <li>點擊「保存當前收益」可以保存當前數據</li>
+                <li>點擊「查看記錄」可以查看和管理保存的記錄</li>
+                <li>點擊「重置」可以重新開始計算</li>
+            </ol>
+        </div>
+    </div>
+
+    <!-- 保存记录模态窗口 -->
+    <div class="modal" id="saveModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">保存當前收益</h2>
+                <button class="close-btn" id="closeSaveModal">&times;</button>
+            </div>
+            <div class="save-form">
+                <input type="text" id="recordName" placeholder="為此記錄命名 (例如: 怪物獵人收益)">
+                <button id="confirmSave" style="width: 100%;">確認保存</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 查看记录模态窗口 -->
+    <div class="modal" id="viewModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">收益記錄</h2>
+                <button class="close-btn" id="closeViewModal">&times;</button>
+            </div>
+            <div class="records-list" id="recordsList">
+                <!-- 记录将在这里动态生成 -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const startExpInput = document.getElementById('startExp');
+            const currentExpInput = document.getElementById('currentExp');
+            const startBtn = document.getElementById('startBtn');
+            const updateBtn = document.getElementById('updateBtn');
+            const resetBtn = document.getElementById('resetBtn');
+            const saveBtn = document.getElementById('saveBtn');
+            const viewBtn = document.getElementById('viewBtn');
+            const timerDisplay = document.getElementById('timer');
+            const totalExpDisplay = document.getElementById('totalExp');
+            const elapsedTimeDisplay = document.getElementById('elapsedTime');
+            const expPerMinDisplay = document.getElementById('expPerMin');
+            const expPerHourDisplay = document.getElementById('expPerHour');
+            
+            // 模态窗口相关元素
+            const saveModal = document.getElementById('saveModal');
+            const viewModal = document.getElementById('viewModal');
+            const closeSaveModal = document.getElementById('closeSaveModal');
+            const closeViewModal = document.getElementById('closeViewModal');
+            const recordNameInput = document.getElementById('recordName');
+            const confirmSaveBtn = document.getElementById('confirmSave');
+            const recordsList = document.getElementById('recordsList');
+            
+            let startTime = null;
+            let timerInterval = null;
+            let elapsedSeconds = 0;
+            let startExp = 0;
+            let currentExp = 0;
+            let records = JSON.parse(localStorage.getItem('expRecords')) || [];
+            
+            // 开始计时
+            startBtn.addEventListener('click', function() {
+                if (!startExpInput.value) {
+                    alert('請輸入起始經驗值');
+                    return;
+                }
+                
+                startExp = parseInt(startExpInput.value);
+                currentExp = startExp;
+                currentExpInput.value = startExp;
+                
+                startTime = new Date();
+                elapsedSeconds = 0;
+                
+                // 清除之前的计时器
+                if (timerInterval) {
+                    clearInterval(timerInterval);
+                }
+                
+                // 开始新的计时器
+                timerInterval = setInterval(updateTimer, 1000);
+                
+                updateResults();
+                
+                startBtn.disabled = true;
+                startBtn.textContent = '計時中...';
+            });
+            
+            // 更新经验值
+            updateBtn.addEventListener('click', function() {
+                if (!startTime) {
+                    alert('請先開始計時');
+                    return;
+                }
+                
+                if (!currentExpInput.value) {
+                    alert('請輸入目前經驗值');
+                    return;
+                }
+                
+                currentExp = parseInt(currentExpInput.value);
+                updateResults();
+            });
+            
+            // 重置
+            resetBtn.addEventListener('click', function() {
+                if (timerInterval) {
+                    clearInterval(timerInterval);
+                }
+                
+                startTime = null;
+                elapsedSeconds = 0;
+                startExp = 0;
+                currentExp = 0;
+                
+                startExpInput.value = '';
+                currentExpInput.value = '';
+                timerDisplay.textContent = '00:00:00';
+                
+                updateResults();
+                
+                startBtn.disabled = false;
+                startBtn.textContent = '開始計時';
+            });
+            
+            // 保存当前收益
+            saveBtn.addEventListener('click', function() {
+                if (!startTime) {
+                    alert('請先開始計時並更新經驗值');
+                    return;
+                }
+                
+                if (parseInt(totalExpDisplay.textContent) === 0) {
+                    alert('請先更新經驗值以獲得收益數據');
+                    return;
+                }
+                
+                recordNameInput.value = `記錄 ${new Date().toLocaleString()}`;
+                saveModal.style.display = 'flex';
+            });
+            
+            // 查看记录
+            viewBtn.addEventListener('click', function() {
+                displayRecords();
+                viewModal.style.display = 'flex';
+            });
+            
+            // 关闭保存模态窗口
+            closeSaveModal.addEventListener('click', function() {
+                saveModal.style.display = 'none';
+            });
+            
+            // 关闭查看模态窗口
+            closeViewModal.addEventListener('click', function() {
+                viewModal.style.display = 'none';
+            });
+            
+            // 确认保存
+            confirmSaveBtn.addEventListener('click', function() {
+                const recordName = recordNameInput.value.trim();
+                if (!recordName) {
+                    alert('請輸入記錄名稱');
+                    return;
+                }
+                
+                const record = {
+                    id: Date.now(),
+                    name: recordName,
+                    startExp: startExp,
+                    currentExp: currentExp,
+                    totalExp: parseInt(totalExpDisplay.textContent.replace(/,/g, '')),
+                    elapsedTime: elapsedTimeDisplay.textContent,
+                    expPerMin: parseFloat(expPerMinDisplay.textContent),
+                    expPerHour: parseFloat(expPerHourDisplay.textContent),
+                    timestamp: new Date().toISOString()
+                };
+                
+                records.unshift(record);
+                localStorage.setItem('expRecords', JSON.stringify(records));
+                
+                saveModal.style.display = 'none';
+                alert('記錄保存成功！');
+            });
+            
+            // 更新计时器显示
+            function updateTimer() {
+                elapsedSeconds++;
+                
+                const hours = Math.floor(elapsedSeconds / 3600);
+                const minutes = Math.floor((elapsedSeconds % 3600) / 60);
+                const seconds = elapsedSeconds % 60;
+                
+                timerDisplay.textContent = 
+                    `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+            }
+            
+            // 更新结果显示
+            function updateResults() {
+                const totalExpGained = currentExp - startExp;
+                const elapsedMinutes = elapsedSeconds / 60;
+                
+                totalExpDisplay.textContent = totalExpGained.toLocaleString();
+                elapsedTimeDisplay.textContent = `${elapsedMinutes.toFixed(2)} 分鐘`;
+                
+                if (elapsedMinutes > 0) {
+                    const expPerMin = totalExpGained / elapsedMinutes;
+                    expPerMinDisplay.textContent = expPerMin.toFixed(2);
+                    expPerHourDisplay.textContent = (expPerMin * 60).toFixed(2);
+                } else {
+                    expPerMinDisplay.textContent = '0';
+                    expPerHourDisplay.textContent = '0';
+                }
+            }
+            
+            // 显示记录列表
+            function displayRecords() {
+                recordsList.innerHTML = '';
+                
+                if (records.length === 0) {
+                    recordsList.innerHTML = '<div class="no-records">暫無保存記錄</div>';
+                    return;
+                }
+                
+                records.forEach(record => {
+                    const recordItem = document.createElement('div');
+                    recordItem.className = 'record-item';
+                    
+                    recordItem.innerHTML = `
+                        <div class="record-info">
+                            <div class="record-name">${record.name}</div>
+                            <div class="record-details">
+                                總經驗: ${record.totalExp.toLocaleString()} | 
+                                時間: ${record.elapsedTime} | 
+                                每分鐘: ${record.expPerMin.toFixed(2)} | 
+                                每小時: ${record.expPerHour.toFixed(2)}
+                            </div>
+                        </div>
+                        <div class="record-actions">
+                            <button class="load-btn" data-id="${record.id}">載入</button>
+                            <button class="delete-btn" data-id="${record.id}">刪除</button>
+                        </div>
+                    `;
+                    
+                    recordsList.appendChild(recordItem);
+                });
+                
+                // 添加删除按钮事件
+                document.querySelectorAll('.delete-btn').forEach(btn => {
+                    btn.addEventListener('click', function() {
+                        const id = parseInt(this.getAttribute('data-id'));
+                        if (confirm('確定要刪除此記錄嗎？')) {
+                            records = records.filter(record => record.id !== id);
+                            localStorage.setItem('expRecords', JSON.stringify(records));
+                            displayRecords();
+                        }
+                    });
+                });
+                
+                // 添加载入按钮事件
+                document.querySelectorAll('.load-btn').forEach(btn => {
+                    btn.addEventListener('click', function() {
+                        const id = parseInt(this.getAttribute('data-id'));
+                        const record = records.find(record => record.id === id);
+                        
+                        if (record) {
+                            startExpInput.value = record.startExp;
+                            currentExpInput.value = record.currentExp;
+                            
+                            // 解析时间
+                            const timeMatch = record.elapsedTime.match(/(\d+\.\d+)/);
+                            if (timeMatch) {
+                                elapsedSeconds = Math.floor(parseFloat(timeMatch[1]) * 60);
+                                updateTimerDisplay();
+                            }
+                            
+                            updateResults();
+                            viewModal.style.display = 'none';
+                            alert('記錄載入成功！');
+                        }
+                    });
+                });
+            }
+            
+            // 更新计时器显示（用于载入记录时）
+            function updateTimerDisplay() {
+                const hours = Math.floor(elapsedSeconds / 3600);
+                const minutes = Math.floor((elapsedSeconds % 3600) / 60);
+                const seconds = elapsedSeconds % 60;
+                
+                timerDisplay.textContent = 
+                    `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+            }
+            
+            // 点击模态窗口外部关闭
+            window.addEventListener('click', function(event) {
+                if (event.target === saveModal) {
+                    saveModal.style.display = 'none';
+                }
+                if (event.target === viewModal) {
+                    viewModal.style.display = 'none';
+                }
+            });
+        });
+    </script>
+</body>
+</html>
